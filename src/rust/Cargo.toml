@@ -1,0 +1,13 @@
+[package]
+name = 'rgeohash'
+publish = false
+version = '0.1.0'
+edition = '2021'
+
+[lib]
+crate-type = [ 'staticlib' ]
+name = 'rgeohash'
+
+[dependencies]
+extendr-api = '*'
+geohash = "0.13.1"

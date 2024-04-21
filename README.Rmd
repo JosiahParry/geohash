@@ -1,0 +1,64 @@
+---
+output: github_document
+format: gfm
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# geohash
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+`{geohash}` is an R package to provide geohash encoding and decoding. It is based on the [Rust crate geohash](https://docs.rs/geohash). This package is actively under development.
+
+You can watch me create this package in my [YouTube video](https://youtu.be/yaxfqpECIZ0).
+
+## Installation
+
+You can install the development version of geohash like so:
+
+``` r
+if (!requireNamespace("remotes")) install.packages("remotes")
+
+remotes::install_github("josiahparry/geohash")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+# geohash doesn't have any exported functions yet
+atlanta <- geohash:::encode(-84, 33, 12)
+atlanta
+
+geohash:::decode(atlanta)
+```
+
+
+
+What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+
+```{r cars}
+summary(cars)
+```
+
+You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+
+You can also embed plots, for example:
+
+```{r pressure, echo = FALSE}
+plot(pressure)
+```
+
+In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
