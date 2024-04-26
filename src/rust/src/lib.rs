@@ -1,5 +1,5 @@
 use extendr_api::prelude::*;
-use geohash::Coord;
+use geohash::{Coord, Rect};
 
 #[extendr]
 fn encode(x: Doubles, y: Doubles, length: i32) -> Strings {
@@ -43,6 +43,7 @@ fn decode(geohash: Strings) -> Robj {
     all_decoded.into_dataframe().unwrap().as_robj().clone()
 }
 
+// TODO
 #[derive(Debug, Default, Clone, IntoDataFrameRow)]
 struct Decoded {
     x: Option<f64>,
@@ -61,6 +62,37 @@ impl From<(Coord, f64, f64)> for Decoded {
         }
     }
 }
+
+#[extendr]
+fn decode_bbox(geohash: Strings, crs: Robj) -> List {
+    geohash
+        .into_iter()
+        .map(|ghi| {
+            let hash = geohash::decode_bbox(ghi.as_str());
+
+            match hash {
+                Ok(gh) => rect_to_bbox(gh, &crs),
+                Err(_) => ().into_robj(),
+            }
+        })
+        .collect::<List>()
+}
+
+fn rect_to_bbox(x: Rect, crs: &Robj) -> Robj {
+    let (xmin, ymin) = x.min().x_y();
+    let (xmax, ymax) = x.max().x_y();
+
+    let res = Doubles::from_values([xmin, ymin, xmax, ymax]);
+
+    res.into_robj()
+        .set_names(&["xmin", "ymin", "xmax", "ymax"])
+        .unwrap()
+        .set_attrib("crs", crs.clone())
+        .unwrap()
+        .set_class(&["bbox"])
+        .unwrap()
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -68,4 +100,5 @@ extendr_module! {
     mod geohash;
     fn encode;
     fn decode;
+    fn decode_bbox;
 }

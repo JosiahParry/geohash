@@ -15,5 +15,7 @@ encode <- function(x, y, length) .Call(wrap__encode, x, y, length)
 
 decode <- function(geohash) .Call(wrap__decode, geohash)
 
+decode_bbox <- function(geohash, crs) .Call(wrap__decode_bbox, geohash, crs)
+
 
 # nolint end
