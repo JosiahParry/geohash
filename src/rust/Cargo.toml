@@ -12,3 +12,7 @@ name = 'rgeohash'
 extendr-api = '*'
 geohash = "0.13.1"
 lazy_static = "1.5.0"
+
+[profile.release]
+codegen-units = 1
+lto = true

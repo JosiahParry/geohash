@@ -23,6 +23,10 @@ knitr::opts_chunk$set(
 
 You can watch me create this package in my [YouTube video](https://youtu.be/yaxfqpECIZ0).
 
+There is a good chance you do not need to use this package. The package `{geohashTools}` is faster in almost every case.
+
+This package serves as an example of how to use R and Rust together.
+
 ## Installation
 
 You can install the development version of geohash like so:
@@ -91,3 +95,33 @@ We can also find _all_ adjacent neighbors.
 ```{r}
 neighbors(gh)
 ```
+
+## Benchmarks 
+
+```{r}
+n <- 1e5
+x <- runif(n, -180, 180)
+y <- runif(n, -90, 90)
+
+bench::mark(
+  geohash = geohash::encode(x, y, 8L),
+  geohashTools = geohashTools::gh_encode(y, x, 8L)
+)
+
+gh <- geohash::encode(x, y, 8)
+
+bench::mark(
+  geohash = geohash::neighbors(gh),
+  geohashTools = geohashTools::gh_neighbors(gh),
+  check = FALSE
+)
+
+bench::mark(
+  geohash = geohash::decode(gh),
+  geohashTools = geohashTools::gh_decode(gh, TRUE),
+  check = FALSE
+)
+
+```
+
+

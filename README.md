@@ -14,6 +14,11 @@ package is actively under development.
 You can watch me create this package in my [YouTube
 video](https://youtu.be/yaxfqpECIZ0).
 
+There is a good chance you do not need to use this package. The package
+`{geohashTools}` is faster in almost every case.
+
+This package serves as an example of how to use R and Rust together.
+
 ## Installation
 
 You can install the development version of geohash like so:
@@ -129,4 +134,52 @@ neighbors(gh)
 #> 3 fypr27nh fypr27nk fypr27n7 fypr27n6 fypr27n4 fypr27jf fypr… fypr…
 #> 4 st4ssv41 st4ssv43 st4ssv42 st4ssufr st4ssufp st4ssucz st4s… st4s…
 #> 5 xk0s0nc4 xk0s0nc6 xk0s0nc3 xk0s0nc2 xk0s0nc0 xk0s0nbb xk0s… xk0s…
+```
+
+## Benchmarks
+
+``` r
+n <- 1e5
+x <- runif(n, -180, 180)
+y <- runif(n, -90, 90)
+
+bench::mark(
+  geohash = geohash::encode(x, y, 8L),
+  geohashTools = geohashTools::gh_encode(y, x, 8L)
+)
+#> # A tibble: 2 × 6
+#>   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 geohash        38.7ms   40.2ms      23.9     781KB        0
+#> 2 geohashTools   12.2ms   12.2ms      79.7     781KB        0
+```
+
+``` r
+
+gh <- geohash::encode(x, y, 8)
+
+bench::mark(
+  geohash = geohash::neighbors(gh),
+  geohashTools = geohashTools::gh_neighbors(gh),
+  check = FALSE
+)
+#> # A tibble: 2 × 6
+#>   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 geohash       182.6ms  187.7ms      5.31     6.1MB     0   
+#> 2 geohashTools   67.1ms   67.4ms     14.7      6.1MB     2.94
+```
+
+``` r
+
+bench::mark(
+  geohash = geohash::decode(gh),
+  geohashTools = geohashTools::gh_decode(gh, TRUE),
+  check = FALSE
+)
+#> # A tibble: 2 × 6
+#>   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 geohash        2.23ms   2.86ms      349.    3.05MB    11.7 
+#> 2 geohashTools   3.61ms   3.86ms      260.    3.05MB     7.63
 ```

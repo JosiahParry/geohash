@@ -59,6 +59,7 @@ fn encode(x: Doubles, y: Doubles, length: i32) -> Strings {
         throw_r_error("`x` and `y` must be of the same length")
     }
 
+    let l = length as usize;
     x.into_iter()
         .zip(y.into_iter())
         .map(|(xi, yi)| {
@@ -68,7 +69,7 @@ fn encode(x: Doubles, y: Doubles, length: i32) -> Strings {
                 let xi = xi.inner();
                 let yi = yi.inner();
                 let c = Coord { x: xi, y: yi };
-                let encoded = geohash::encode(c, length as usize);
+                let encoded = geohash::encode(c, l);
 
                 match encoded {
                     Ok(hash) => Rstr::from(hash),
