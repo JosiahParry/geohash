@@ -37,6 +37,7 @@ fn handle_dirs(dirs: Strings, n: usize) -> Vec<Option<Direction>> {
 }
 
 #[extendr]
+/// @export
 fn neighbor(geohash: Strings, direction: Strings) -> Strings {
     let n = geohash.len();
     let dirs = handle_dirs(direction, n);
@@ -59,34 +60,50 @@ fn neighbor(geohash: Strings, direction: Strings) -> Strings {
         .collect::<Strings>()
 }
 
-#[derive(Debug, Default, Clone, IntoDataFrameRow)]
+#[derive(Debug, Clone, IntoDataFrameRow)]
 pub struct RNeighbors {
-    n: String,
-    ne: String,
-    e: String,
-    se: String,
-    s: String,
-    sw: String,
-    w: String,
-    nw: String,
+    n: Option<String>,
+    ne: Option<String>,
+    e: Option<String>,
+    se: Option<String>,
+    s: Option<String>,
+    sw: Option<String>,
+    w: Option<String>,
+    nw: Option<String>,
 }
 
 impl From<geohash::Neighbors> for RNeighbors {
     fn from(value: geohash::Neighbors) -> Self {
         RNeighbors {
-            n: value.n,
-            ne: value.ne,
-            e: value.e,
-            se: value.se,
-            s: value.s,
-            sw: value.sw,
-            w: value.w,
-            nw: value.nw,
+            n: Some(value.n),
+            ne: Some(value.ne),
+            e: Some(value.e),
+            se: Some(value.se),
+            s: Some(value.s),
+            sw: Some(value.sw),
+            w: Some(value.w),
+            nw: Some(value.nw),
+        }
+    }
+}
+
+impl Default for RNeighbors {
+    fn default() -> Self {
+        Self {
+            n: None,
+            ne: None,
+            e: None,
+            se: None,
+            s: None,
+            sw: None,
+            w: None,
+            nw: None,
         }
     }
 }
 
 #[extendr]
+/// @export
 fn neighbors(geohash: Strings) -> Robj {
     geohash
         .into_iter()
@@ -104,7 +121,8 @@ fn neighbors(geohash: Strings) -> Robj {
         .into_dataframe()
         .unwrap()
         .as_robj()
-        .clone()
+        .set_attrib("class", ["tbl", "data.frame"])
+        .unwrap()
 }
 
 extendr_module! {

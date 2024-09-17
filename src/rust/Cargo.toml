@@ -11,3 +11,4 @@ name = 'rgeohash'
 [dependencies]
 extendr-api = '*'
 geohash = "0.13.1"
+lazy_static = "1.5.0"

@@ -35,14 +35,59 @@ remotes::install_github("josiahparry/geohash")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Encode x and y coordinates as a geoash using `encode()` 
 
-```{r example}
-# geohash doesn't have any exported functions yet
-atlanta <- geohash:::encode(-84, 33, 12)
-atlanta
-
-geohash:::decode(atlanta)
+```{r include = FALSE}
+set.seed(0)
+library(pillar)
+library(sf)
 ```
 
+```{r}
+library(geohash)
 
+# create random x & y points
+n <- 5
+x <- runif(n, -180, 180)
+y <- runif(n, -90, 90)
+
+
+gh <- encode(x, y, 8)
+gh
+```
+
+The geohashes can be decoded using `decode()` which provides you with their center, and the error in both the x and y directions. 
+
+```{r}
+decode(gh)
+```
+
+Additionally, you can extract the bounding box of the geohashes using `decode_bbox()`. This returns a `bbox` object from the `sf` package. 
+
+
+```{r}
+bboxes <- decode_bbox(gh) 
+bboxes
+```
+
+You can use these bounding boxes to create an `sfc` of polygons. 
+
+```{r}
+do.call(c, lapply(bboxes, sf::st_as_sfc))
+```
+
+Alternatively, you can identify the neighboring geohash cells using `neighbor()` and `neighbors()` function. The `neighbor()` function identifies a single neighbor based on a direction whereas `neighbors()` provides all adjacent geohashes. 
+
+Here we can find the neighbors to the north and south-east.
+
+```{r}
+neighbor(gh, "n")
+neighbor(gh, "se")
+```
+
+We can also find _all_ adjacent neighbors.
+
+
+```{r}
+neighbors(gh)
+```

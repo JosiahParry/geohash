@@ -11,14 +11,42 @@
 #' @useDynLib geohash, .registration = TRUE
 NULL
 
+#' Encode a coordinate to a geohash
+#' 
+#' Given a vector of x and y coordinates, returns the geohash of the location. 
+#' Coordinates must be provided in longitude and latitude. In the case that an invalid 
+#' longitude or latitude value is provided, an `NA` is returned and not an error. 
+#' 
+#' @param x a numeric vector of longitudes. Must be within the range of [-180, 180] otherwise an `NA` will be returned.
+#' @param y a numeric vector of latitudes. Must be within the range of [-90, 90] otherwise an `NA` will be returned.
+#' @param length a scalar integer between the values of 1 and 12. 
+#' @export
 encode <- function(x, y, length) .Call(wrap__encode, x, y, length)
 
+#' @export
+#' @rdname decode
 decode <- function(geohash) .Call(wrap__decode, geohash)
 
-decode_bbox <- function(geohash, crs) .Call(wrap__decode_bbox, geohash, crs)
+#' Decode a geohash
+#' 
+#' Decodes a vector of geohashes. 
+#' 
+#' @param geohash a character vector of geohash codes
+#' @returns 
+#' 
+#' - `decode()` returns a `data.frame` with four columns: `x`, `y`, and `x_error`, `y_error`
+#' - `decode_bbox()` returns a list of `sf` `bbox` objects
+#' @export
+#' @rdname decode
+#' @examples 
+#' decode("eyywe2zq")
+#' decode_bbox("eyywe2zq")
+decode_bbox <- function(geohash) .Call(wrap__decode_bbox, geohash)
 
+#' @export
 neighbor <- function(geohash, direction) .Call(wrap__neighbor, geohash, direction)
 
+#' @export
 neighbors <- function(geohash) .Call(wrap__neighbors, geohash)
 
 
