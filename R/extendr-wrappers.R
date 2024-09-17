@@ -17,5 +17,9 @@ decode <- function(geohash) .Call(wrap__decode, geohash)
 
 decode_bbox <- function(geohash, crs) .Call(wrap__decode_bbox, geohash, crs)
 
+neighbor <- function(geohash, direction) .Call(wrap__neighbor, geohash, direction)
+
+neighbors <- function(geohash) .Call(wrap__neighbors, geohash)
+
 
 # nolint end

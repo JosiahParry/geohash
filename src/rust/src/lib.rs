@@ -1,5 +1,6 @@
 use extendr_api::prelude::*;
 use geohash::{Coord, Rect};
+mod neighbor;
 
 #[extendr]
 fn encode(x: Doubles, y: Doubles, length: i32) -> Strings {
@@ -43,7 +44,6 @@ fn decode(geohash: Strings) -> Robj {
     all_decoded.into_dataframe().unwrap().as_robj().clone()
 }
 
-// TODO
 #[derive(Debug, Default, Clone, IntoDataFrameRow)]
 struct Decoded {
     x: Option<f64>,
@@ -101,4 +101,5 @@ extendr_module! {
     fn encode;
     fn decode;
     fn decode_bbox;
+    use neighbor;
 }
