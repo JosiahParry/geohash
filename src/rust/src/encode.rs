@@ -116,10 +116,10 @@ fn encode_par(longitude: &[f64], latitude: &[f64], length: i32) -> Robj {
     let map: [[u8; 8]; 4] = [*b"0145hjnp", *b"2367kmqr", *b"89destwx", *b"bcfguvyz"];
 
     let gh = unsafe {
-        libR_sys::Rf_protect(libR_sys::Rf_allocVector(
+        libR_sys::Rf_allocVector(
             libR_sys::SEXPTYPE::STRSXP,
             n as isize,
-        ))
+        )
     };
 
     // This will automatically protect our sexp from gc
