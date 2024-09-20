@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use extendr_api::prelude::*;
 use geohash::{Coord, Rect};
+mod encode;
 mod neighbor;
 
 use lazy_static::lazy_static;
@@ -10,7 +11,9 @@ lazy_static! {
     static ref EPSG4326: HashMap<&'static str, &'static str> = {
         let mut m = HashMap::new();
         m.insert("input", "EPSG:4326");
-        m.insert("wkt", r#"GEOGCRS["WGS 84",
+        m.insert(
+            "wkt",
+            r#"GEOGCRS["WGS 84",
     ENSEMBLE["World Geodetic System 1984 ensemble",
         MEMBER["World Geodetic System 1984 (Transit)"],
         MEMBER["World Geodetic System 1984 (G730)"],
@@ -35,56 +38,17 @@ lazy_static! {
         SCOPE["Horizontal component of 3D system."],
         AREA["World."],
         BBOX[-90,-180,90,180]],
-    ID["EPSG",4326]]"#);
+    ID["EPSG",4326]]"#,
+        );
         m
     };
-}
-
-#[extendr]
-/// Encode a coordinate to a geohash
-/// 
-/// Given a vector of x and y coordinates, returns the geohash of the location. 
-/// Coordinates must be provided in longitude and latitude. In the case that an invalid 
-/// longitude or latitude value is provided, an `NA` is returned and not an error. 
-/// 
-/// @param x a numeric vector of longitudes. Must be within the range of [-180, 180] otherwise an `NA` will be returned.
-/// @param y a numeric vector of latitudes. Must be within the range of [-90, 90] otherwise an `NA` will be returned.
-/// @param length a scalar integer between the values of 1 and 12. 
-/// @export
-fn encode(x: Doubles, y: Doubles, length: i32) -> Strings {
-
-    if (length > 12i32) | (length < 1i32) {
-        throw_r_error("`length` must be a value between 1 and 12")
-    } else if x.len() != y.len() {
-        throw_r_error("`x` and `y` must be of the same length")
-    }
-
-    let l = length as usize;
-    x.into_iter()
-        .zip(y.into_iter())
-        .map(|(xi, yi)| {
-            if xi.is_na() | yi.is_na() {
-                Rstr::na()
-            } else {
-                let xi = xi.inner();
-                let yi = yi.inner();
-                let c = Coord { x: xi, y: yi };
-                let encoded = geohash::encode(c, l);
-
-                match encoded {
-                    Ok(hash) => Rstr::from(hash),
-                    Err(_) => Rstr::na(),
-                }
-            }
-        })
-        .collect::<Strings>()
 }
 
 #[extendr]
 /// @export
 /// @rdname decode
 fn decode(geohash: Strings) -> Robj {
-    let all_decoded = geohash
+    let mut all_decoded = geohash
         .into_iter()
         .map(|ghi| {
             if ghi.is_na() {
@@ -97,14 +61,16 @@ fn decode(geohash: Strings) -> Robj {
                 }
             }
         })
-        .collect::<Vec<Decoded>>();
-
-    all_decoded
+        .collect::<Vec<Decoded>>()
         .into_dataframe()
         .unwrap()
-        .as_robj()
+        .into_robj();
+
+    all_decoded
         .set_attrib("class", ["tbl", "data.frame"])
-        .unwrap()
+        .unwrap();
+
+    all_decoded
 }
 
 #[derive(Debug, Default, Clone, IntoDataFrameRow)]
@@ -128,24 +94,25 @@ impl From<(Coord, f64, f64)> for Decoded {
 
 #[extendr]
 /// Decode a geohash
-/// 
-/// Decodes a vector of geohashes. 
-/// 
+///
+/// Decodes a vector of geohashes.
+///
 /// @param geohash a character vector of geohash codes
-/// @returns 
-/// 
+/// @returns
+///
 /// - `decode()` returns a `data.frame` with four columns: `x`, `y`, and `x_error`, `y_error`
 /// - `decode_bbox()` returns a list of `sf` `bbox` objects
 /// @export
 /// @rdname decode
-/// @examples 
+/// @examples
 /// decode("eyywe2zq")
 /// decode_bbox("eyywe2zq")
 fn decode_bbox(geohash: Strings) -> List {
-    let crs = list!(
+    let mut crs = list!(
         input = EPSG4326.get("input").unwrap(),
         wkt = EPSG4326.get("wkt").unwrap()
-    ).set_class(&["crs"]).unwrap();
+    );
+    crs.set_class(&["crs"]).unwrap();
 
     geohash
         .into_iter()
@@ -160,19 +127,19 @@ fn decode_bbox(geohash: Strings) -> List {
         .collect::<List>()
 }
 
-fn rect_to_bbox(x: Rect, crs: &Robj) -> Robj {
+fn rect_to_bbox(x: Rect, crs: &List) -> Robj {
     let (xmin, ymin) = x.min().x_y();
     let (xmax, ymax) = x.max().x_y();
 
-    let res = Doubles::from_values([xmin, ymin, xmax, ymax]);
+    let mut res = Doubles::from_values([xmin, ymin, xmax, ymax]).into_robj();
 
-    res.into_robj()
-        .set_names(&["xmin", "ymin", "xmax", "ymax"])
+    res.set_names(&["xmin", "ymin", "xmax", "ymax"])
         .unwrap()
         .set_attrib("crs", crs.clone())
         .unwrap()
         .set_class(&["bbox"])
-        .unwrap()
+        .unwrap();
+    res
 }
 
 // Macro to generate exports.
@@ -180,8 +147,8 @@ fn rect_to_bbox(x: Rect, crs: &Robj) -> Robj {
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod geohash;
-    fn encode;
     fn decode;
     fn decode_bbox;
     use neighbor;
+    use encode;
 }

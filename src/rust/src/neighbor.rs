@@ -105,7 +105,7 @@ impl Default for RNeighbors {
 #[extendr]
 /// @export
 fn neighbors(geohash: Strings) -> Robj {
-    geohash
+    let mut geohash = geohash
         .into_iter()
         .map(|gi| {
             if gi.is_na() {
@@ -120,9 +120,9 @@ fn neighbors(geohash: Strings) -> Robj {
         .collect::<Vec<RNeighbors>>()
         .into_dataframe()
         .unwrap()
-        .as_robj()
-        .set_attrib("class", ["tbl", "data.frame"])
-        .unwrap()
+        .into_robj();
+    geohash.set_attrib("class", ["tbl", "data.frame"]).unwrap();
+    geohash
 }
 
 extendr_module! {

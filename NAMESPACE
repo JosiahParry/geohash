@@ -3,6 +3,7 @@
 export(decode)
 export(decode_bbox)
 export(encode)
+export(encode_par)
 export(neighbor)
 export(neighbors)
 useDynLib(geohash, .registration = TRUE)
