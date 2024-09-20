@@ -9,9 +9,11 @@ crate-type = [ 'staticlib' ]
 name = 'rgeohash'
 
 [dependencies]
-extendr-api = '*'
+extendr-api = '0.7.1'
 geohash = "0.13.1"
 lazy_static = "1.5.0"
+libR-sys = "0.7.1"
+rayon = "1.10.0"
 
 [profile.release]
 codegen-units = 1

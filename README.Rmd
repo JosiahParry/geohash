@@ -99,16 +99,16 @@ neighbors(gh)
 ## Benchmarks 
 
 ```{r}
-n <- 1e5
+n <- 1e6
 x <- runif(n, -180, 180)
 y <- runif(n, -90, 90)
 
 bench::mark(
   geohash = geohash::encode(x, y, 8L),
-  geohashTools = geohashTools::gh_encode(y, x, 8L)
+  geohash_par = geohash::encode_par(x, y, 8L),
+  geohashTools = geohashTools::gh_encode(y, x, 8L),
+  iterations = 10
 )
-
-gh <- geohash::encode(x, y, 8)
 
 bench::mark(
   geohash = geohash::neighbors(gh),
