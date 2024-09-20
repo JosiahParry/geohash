@@ -127,6 +127,7 @@ fn encode_par(longitude: &[f64], latitude: &[f64], length: i32) -> Robj {
 
     (0..n)
         .into_par_iter()
+        .with_min_len(1000)
         .map(|i| encode_single_gh(longitude[i], latitude[i], k, &map))
         .collect::<Vec<_>>()
         .into_iter()
