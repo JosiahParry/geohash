@@ -4,7 +4,6 @@ use rayon::prelude::*;
 const MAX_K: usize = 12;
 const MAP: [[u8; 8]; 4] = [*b"0145hjnp", *b"2367kmqr", *b"89destwx", *b"bcfguvyz"];
 
-#[repr(C)]
 union Zd {
     d: f64,
     i: i64,
@@ -76,12 +75,7 @@ fn encode_single_gh<const K: usize, const LEN: usize>(xp_i: f64, yp_i: f64) -> [
 fn encode_const<const K: usize, const LEN: usize>(longitude: &[f64], latitude: &[f64]) -> Robj {
     let n = latitude.len();
 
-    let gh = unsafe {
-        libR_sys::Rf_protect(libR_sys::Rf_allocVector(
-            libR_sys::SEXPTYPE::STRSXP,
-            n as isize,
-        ))
-    };
+    let gh = unsafe { libR_sys::Rf_allocVector(libR_sys::SEXPTYPE::STRSXP, n as isize) };
 
     // This will automatically protect our sexp from gc
     let obj = Robj::from_sexp(gh);
@@ -141,9 +135,13 @@ fn encode_par_const<const K: usize, const LEN: usize>(longitude: &[f64], latitud
 
     let mut buffers = vec![[0u8; LEN]; n];
 
-    buffers.par_iter_mut().enumerate().for_each(|(i, buffer)| {
-        *buffer = encode_single_gh::<K, LEN>(longitude[i], latitude[i]);
-    });
+    buffers
+        .par_iter_mut()
+        .with_min_len(4096)
+        .enumerate()
+        .for_each(|(i, buffer)| {
+            *buffer = encode_single_gh::<K, LEN>(longitude[i], latitude[i]);
+        });
 
     for (i, buffer) in buffers.iter().enumerate() {
         let str = unsafe { libR_sys::Rf_mkChar(buffer.as_ptr() as *const i8) };
