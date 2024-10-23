@@ -83,8 +83,12 @@ prep.step_geohash <- function(
   info = NULL,
   ...
 ) {
-  lon_name <- recipes_eval_select(x$lon, training, info)
-  lat_name <- recipes_eval_select(x$lat, training, info)
+   if (!requireNamespace("recipes")) {
+       stop("The package `recipes` is required for this functionality")
+   }
+  check_type <- getFromNamespace("check_type", "recipes")
+  lon_name <- recipes::recipes_eval_select(x$lon, training, info)
+  lat_name <- recipes::recipes_eval_select(x$lat, training, info)
   check_type(training[, c(lon_name, lat_name)], types = c("double", "integer"))
   if (length(lon_name) > 1) {
     cli::cli_abort(c(
