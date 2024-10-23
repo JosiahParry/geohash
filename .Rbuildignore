@@ -3,3 +3,6 @@
 ^src/\.cargo$
 ^README\.Rmd$
 ^src/rust/vendor$
+bench.R
+Makefile
+^LICENSE\.md$
