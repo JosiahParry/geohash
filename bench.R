@@ -15,8 +15,11 @@ bench::mark(
 #> 2 geohash_p…  5.41ms  5.61ms     162.   783.72KB     0       25     0      155ms
 #> 3 geohashTo…  8.79ms  9.08ms     108.   816.73KB     4.49    24     1      223ms
 
-
+library(geohash)
 library(recipes)
+n <- 1e6
+x <- runif(n, -180, 180)
+y <- runif(n, -90, 90)
 df <- data.frame(
   y = rnorm(n, 0, 1),
   longitude  = x,
@@ -36,7 +39,7 @@ run_step_geohash  <- \(parallel) {
   juiced
 }
 
-run_step_mutate_par  <- \() {
+step_mutate_encode_par  <- \() {
   rec <- df |> 
     recipe(y ~ .) |> 
     step_mutate(
@@ -46,16 +49,18 @@ run_step_mutate_par  <- \() {
   juiced
 }
 
-
 bench::mark(
-  sequential_step = run_step_geohash(parallel = FALSE),
-  parallel_step = run_step_geohash(parallel = TRUE),
-  parallel_mutate = run_step_mutate_par(),
-  iterations = 25L
-)
-# # A tibble: 3 × 13
-# expression     min median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time
-# <bch:expr>   <bch> <bch:>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm>
-# 1 sequential_…  6.2s  6.43s     0.154    78.2MB   0.0597    18     7      1.95m
-# 2 parallel_st… 6.13s  6.36s     0.156    46.2MB   0.0607    18     7      1.92m
-# 3 parallel_mu… 6.39s   6.6s     0.151    46.2MB   0.0588    18     7      1.99m
+  step_geohash = run_step_geohash(parallel = FALSE),
+  step_geohash_par = run_step_geohash(parallel = TRUE),
+  step_mutate_encode_par = step_mutate_encode_par(),
+  min_time = Inf,
+  iterations = 15L,
+  memory = FALSE,
+  time_unit = "s"
+)[,c("expression", "median", "n_itr" , "total_time")]
+# # A tibble: 3 × 4
+# expression             median n_itr total_time
+# <bch:expr>              <dbl> <int>      <dbl>
+# 1 step_geohash             3.88    12       46.6
+# 2 step_geohash_par         3.88    11       42.7
+# 3 step_mutate_encode_par   3.88    11       42.9

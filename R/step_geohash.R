@@ -1,16 +1,15 @@
-
 #' Recipe to geohash encode longitude and latitude
 #' 
 #' @param recipe recipe
-#' @param lon longitude
-#' @param lat latitude
+#' @param lon longitude predictor
+#' @param lat latitude predictor
 #' @param role role
 #' @param trained FALSE
 #' @param options list(length = 8, parallel = FALSE)
-#' @param name "geohash"
-#' @param columns NULL
+#' @param name new predictor name, defaults to "geohash"
+#' @param columns NULL (internal)
 #' @param skip FALSE
-#' @param id rand_id("geohash")
+#' @param id NULL, defaults to recipes::rand_id("geohash")
 #' @export
 step_geohash <- function(
   recipe,
@@ -22,15 +21,17 @@ step_geohash <- function(
   name = "geohash",
   columns = NULL,
   skip = FALSE,
-  id = rand_id("geohash")
+  id = NULL
 ) {
-
-   if (!requireNamespace("recipes")) {
-       stop("The package `recipes` is required for this functionality")
-   }
-   
-  check_string <- getFromNamespace("check_string", "recipes")
-
+  if (!requireNamespace("recipes")) {
+      stop("The package `recipes` is required for this functionality")
+  }
+  check_string <- utils::getFromNamespace("check_string", "recipes")
+  add_step <- utils::getFromNamespace("add_step", "recipes")  
+  enquos <- utils::getFromNamespace("enquos", "rlang")  
+  if (is.null(id)) {
+    id = recipes::rand_id("geohash")
+  }
   check_string(name)
   add_step(
     recipe, 
@@ -59,9 +60,10 @@ step_geohash_new <- function(
   skip,
   id
 ) {
-     if (!requireNamespace("recipes")) {
+  if (!requireNamespace("recipes")) {
        stop("The package `recipes` is required for this functionality")
-   }
+  }
+  step  <- utils::getFromNamespace("step", "recipes")
   step(
     subclass = "geohash", 
     lon = lon,
@@ -76,8 +78,8 @@ step_geohash_new <- function(
   )
 }
 
-#' @export
-prep.step_geohash <- function(
+#' @keywords internal
+prep_step_geohash_impl <- function(
   x,
   training,
   info = NULL,
@@ -86,7 +88,7 @@ prep.step_geohash <- function(
    if (!requireNamespace("recipes")) {
        stop("The package `recipes` is required for this functionality")
    }
-  check_type <- getFromNamespace("check_type", "recipes")
+  check_type <- utils::getFromNamespace("check_type", "recipes")
   lon_name <- recipes::recipes_eval_select(x$lon, training, info)
   lat_name <- recipes::recipes_eval_select(x$lat, training, info)
   check_type(training[, c(lon_name, lat_name)], types = c("double", "integer"))
@@ -121,8 +123,8 @@ prep.step_geohash <- function(
   )
 }
 
-#' @export
-bake.step_geohash <- function(object, new_data, ...) {
+#' @keywords internal
+bake_step_geohash_impl <- function(object, new_data, ...) {
    if (!requireNamespace("recipes")) {
        stop("The package `recipes` is required for this functionality")
    }
@@ -154,8 +156,8 @@ bake.step_geohash <- function(object, new_data, ...) {
       )
   }
   new_data[[object$name]] <- geohash_vals
-  new_data  
-  }
+  new_data
+}
 
 
 

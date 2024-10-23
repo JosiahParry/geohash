@@ -14,15 +14,15 @@ step_geohash(
   name = "geohash",
   columns = NULL,
   skip = FALSE,
-  id = rand_id("geohash")
+  id = NULL
 )
 }
 \arguments{
 \item{recipe}{recipe}
 
-\item{lon}{longitude}
+\item{lon}{longitude predictor}
 
-\item{lat}{latitude}
+\item{lat}{latitude predictor}
 
 \item{role}{role}
 
@@ -30,13 +30,13 @@ step_geohash(
 
 \item{options}{list(length = 8, parallel = FALSE)}
 
-\item{name}{"geohash"}
+\item{name}{new predictor name, defaults to "geohash"}
 
-\item{columns}{NULL}
+\item{columns}{NULL (internal)}
 
 \item{skip}{FALSE}
 
-\item{id}{rand_id("geohash")}
+\item{id}{NULL, defaults to recipes::rand_id("geohash")}
 }
 \description{
 Recipe to geohash encode longitude and latitude

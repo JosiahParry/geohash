@@ -1,5 +1,6 @@
 test_that("step_geohash works", {
   testthat::skip_if_not_installed("recipes")
+  library(recipes)
   n <- 10
   df <- data.frame(
     y = rnorm(n, 0, 1),
