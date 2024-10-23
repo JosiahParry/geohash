@@ -123,8 +123,12 @@ prep.step_geohash <- function(
 
 #' @export
 bake.step_geohash <- function(object, new_data, ...) {
+   if (!requireNamespace("recipes")) {
+       stop("The package `recipes` is required for this functionality")
+   }
+   
   col_names <- names(object$columns)
-  check_new_data(col_names, object, new_data)
+  recipes::check_new_data(col_names, object, new_data)
 
   if (length(col_names) == 0) {
     return(new_data)
