@@ -59,6 +59,9 @@ step_geohash_new <- function(
   skip,
   id
 ) {
+     if (!requireNamespace("recipes")) {
+       stop("The package `recipes` is required for this functionality")
+   }
   step(
     subclass = "geohash", 
     lon = lon,
