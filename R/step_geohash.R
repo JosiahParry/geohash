@@ -24,6 +24,13 @@ step_geohash <- function(
   skip = FALSE,
   id = rand_id("geohash")
 ) {
+
+   if (!requireNamespace("recipes")) {
+       stop("The package `recipes` is required for this functionality")
+   }
+   
+  check_string <- getFromNamespace("check_string", "recipes")
+
   check_string(name)
   add_step(
     recipe, 
